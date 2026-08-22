@@ -1,173 +1,60 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do App</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Công trình đang thi công</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        /* Reset toàn bộ về trắng */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background-color: #ffffff;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            text-align: center;
             padding: 20px;
         }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+        h1 {
+            font-size: 80px;
+            font-weight: 700;
+            color: #333333;
+            letter-spacing: 4px;
         }
-        h1 { text-align: center; color: #333; margin-bottom: 20px; }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+
+        /* Hiệu ứng nhấp nháy nhẹ */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 1;
+            }
         }
-        .input-group input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
+
+        h1 {
+            animation: pulse 3s ease-in-out infinite;
         }
-        .input-group input:focus { outline: none; border-color: #667eea; }
-        .input-group button {
-            padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .input-group button:hover { background: #5a67d8; }
-        ul { list-style: none; padding: 0; }
-        li {
-            background: #f8f9fa;
-            padding: 14px 18px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid #667eea;
-        }
-        li.completed {
-            opacity: 0.6;
-            border-left-color: #28a745;
-            text-decoration: line-through;
-        }
-        .task-text { cursor: pointer; flex: 1; }
-        .delete-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .delete-btn:hover { background: #c0392b; }
-        .stats { text-align: center; margin-top: 20px; color: #666; }
-        .clear-btn {
-            width: 100%;
-            padding: 12px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .clear-btn:hover { background: #c0392b; }
-        .empty { text-align: center; color: #999; padding: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📋 To-Do App</h1>
-        <div class="input-group">
-            <input type="text" id="taskInput" placeholder="Nhập công việc...">
-            <button id="addBtn">Thêm</button>
-        </div>
-        <ul id="taskList"></ul>
-        <div class="stats" id="stats">0 công việc</div>
-        <button class="clear-btn" id="clearBtn">🗑️ Xóa tất cả</button>
+        <h1>🚧 CÔNG TRÌNH ĐANG THI CÔNG</h1>
     </div>
-
-    <script>
-        const API_URL = '/api/tasks';
-        let tasks = [];
-
-        async function fetchTasks() {
-            const res = await fetch(API_URL);
-            tasks = await res.json();
-            renderTasks();
-        }
-
-        async function addTask() {
-            const input = document.getElementById('taskInput');
-            const text = input.value.trim();
-            if (!text) return alert('Nhập nội dung!');
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
-            });
-            input.value = '';
-            fetchTasks();
-        }
-
-        async function toggleTask(id) {
-            await fetch(`${API_URL}/${id}`, { method: 'PUT' });
-            fetchTasks();
-        }
-
-        async function deleteTask(id) {
-            if (!confirm('Xóa?')) return;
-            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            fetchTasks();
-        }
-
-        async function clearAll() {
-            if (!confirm('Xóa tất cả?')) return;
-            for (const task of tasks) {
-                await fetch(`${API_URL}/${task.id}`, { method: 'DELETE' });
-            }
-            fetchTasks();
-        }
-
-        function renderTasks() {
-            const list = document.getElementById('taskList');
-            const stats = document.getElementById('stats');
-            if (tasks.length === 0) {
-                list.innerHTML = '<li class="empty">🎯 Chưa có công việc</li>';
-                stats.textContent = '0 công việc';
-                return;
-            }
-            list.innerHTML = tasks.map(task => `
-                <li class="${task.completed ? 'completed' : ''}">
-                    <span class="task-text" onclick="toggleTask(${task.id})">${task.text}</span>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">✖</button>
-                </li>
-            `).join('');
-            const done = tasks.filter(t => t.completed).length;
-            stats.textContent = `${tasks.length} công việc • Đã hoàn thành: ${done}`;
-        }
-
-        document.getElementById('addBtn').addEventListener('click', addTask);
-        document.getElementById('taskInput').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') addTask();
-        });
-        document.getElementById('clearBtn').addEventListener('click', clearAll);
-
-        fetchTasks();
-    </script>
 </body>
 </html>
